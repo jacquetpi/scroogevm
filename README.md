@@ -72,11 +72,12 @@ More components are needed to evaluate metrics on an online configuration.
 * On master node : Our aggregator _vmaggreg.py_ 
 * (optionally) On master node : Our ballooning mechanism _vmaggreg.py_ 
 
+> Be aware:
 > - On workers node, VMs must run  on a QEMU/KVM environment with libvirt is required
 > - All python scripts parse environment variables for configuration. Please refer to _dotenv_ for an _.env_ example file.
 > - Please note that ScroogeVM is not a scheduler and therefore cannot deploy VM by itself
 
-With all probes running, an influxdb database at disposal and a _.env_ well configured : 
+With all probes running, an influxdb database at disposal and a _.env_ well configuredn you can launch scroogevm live monitoring infrastucture by executing:
 ```bash
 (master-node all) source venv/bin/activate
 (master-node terminal1) python3 vmaggreg.py
