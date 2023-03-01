@@ -31,7 +31,9 @@ tar -xJf workload-traces.tar.xz
 ls *.json
 ```
 
-Second, execute ScroogeVM on one of the traces with different strategies. Three are available : percentile, doa, greedy (the latest being the computation introduced in our approach). Implementation can be seen in _model/oversubscriptioncomputation.py_
+Second, execute ScroogeVM on one of the traces with different strategies. Three are available : percentile, doa and greedy (the latest being the computation introduced in our approach). 
+Implementation can be seen in _model/oversubscriptioncomputation.py_
+
 From the `scroogevm` directory, run all three strategies on one trace with the following script:
 ```bash
 source venv/bin/activate
