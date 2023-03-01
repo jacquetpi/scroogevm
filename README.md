@@ -37,21 +37,12 @@ Implementation can be seen in _model/oversubscriptioncomputation.py_
 
 From the `scroogevm` directory, run all three strategies on one trace with the following script:
 ```bash
-source venv/bin/activate
 input="decreasing-workload.json"
 output_folder="results-decreasing-workload"
-mkdir "$output_folder"
-declare -a strategies=("percentile" "doa" "greedy")
-for strategy in "${strategies[@]}"
-do
-    python3 scroogevm.py --strategy="$strategy" --load="$input" --debug=1
-    mv dump-* "$output_folder/dump-$strategy.json"
-done
-ls "$output_folder"
+./launchallfromjson.sh "$input" "$output_folder"
 ```
 NB: input represents one of the json file obtained from our archive. This parameter may be adapted  
 NB: output_folder will be a directory used to store obtained results. Specified location is later needed for the notebook analysis. This parameter may be adapted.  
-NB: debug mode is required to generate a dump file with the computed results
 
 Third, to analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
 ```bash
@@ -73,10 +64,12 @@ More components are needed to evaluate metrics on an online configuration.
 > - All python scripts parse environment variables for configuration. Please refer to _dotenv_ for an _.env_ example file.
 > - Please note that ScroogeVM is not a scheduler and therefore cannot deploy VM by itself
 
-With all probes running, an influxdb database at disposal and a _.env_ well configuredn you can launch scroogevm live monitoring infrastucture by executing:
+With all probes running, an influxdb database at disposal and a _.env_ well configured, you can launch scroogevm live monitoring infrastucture by executing:
 ```bash
 (master-node all) source venv/bin/activate
 (master-node terminal1) python3 vmaggreg.py
 (master-node terminal2) python3 scroogevm.py --strategy=greedy --debug=1 
 (_optional_ master-node terminal3) python3 vmballooning.py
 ```
+
+NB: debug mode is required to generate a dump file with the computed results
