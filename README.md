@@ -20,30 +20,21 @@ source venv/bin/activate
 python3 -m pip install -r requirements.txt
 ```
 
-## Offline mode
-
-```bash
-python3 scroogevm.py --strategy=greedy --load={input.json} --debug=1
-```
-
-Debug mode does two things : display progress and wrote results in a json file than can be afterward used on post-analysis
-
 ## Offline mode : Compare oversubscription strategies
 
 One may want to compare different computation strategies on a offline setting. 
-We propose traces, different strategies and a notebook to do so
+We propose traces, a selection of strategies, and a notebook to do so.
 
-Current oversubscription strategies can be seen in _model/oversubscriptioncomputation.py_
-
-Retrieve traces from the external link and move the archive in your scroogevm directory.
-Unpack with:
+First, retrieve our archive from the external link, move it to the `scroogevm` directory and unpack traces with :
 ```bash
 tar -xJf workload-traces.tar.xz
 ls *.json
 ```
 
-Run all three strategies on one trace:
+Second, execute ScroogeVM on one of the traces with different strategies. Three are available : percentile, doa, greedy (the latest being the computation introduced in our approach). Implementation can be seen in _model/oversubscriptioncomputation.py_
+From the `scroogevm` directory, run all three strategies on one trace with the following script:
 ```bash
+source venv/bin/activate
 input="decreasing-workload.json"
 output_folder="results-decreasing-workload"
 mkdir "$output_folder"
@@ -55,9 +46,11 @@ do
 done
 ls "$output_folder"
 ```
-NB: input and output_folder variable may be adapted to run others traces
+NB: input represents one of the json file obtained from our archive. This parameter may be adapted
+NB: output_folder will be a directory used to store obtained results. Specified location is later needed for the notebook analysis. This parameter may be adapted.
+NB: debug mode is required to generate a dump file with the computed results
 
-To analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
+Third, to analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
 ```bash
 jupyter notebook
 ```
@@ -73,7 +66,7 @@ More components are needed to evaluate metrics on an online configuration.
 * (optionally) On master node : Our ballooning mechanism _vmaggreg.py_ 
 
 > Be aware:
-> - On workers node, VMs must run  on a QEMU/KVM environment with libvirt is required
+> - On workers node, VMs must run  on a QEMU/KVM environment with libvirt available
 > - All python scripts parse environment variables for configuration. Please refer to _dotenv_ for an _.env_ example file.
 > - Please note that ScroogeVM is not a scheduler and therefore cannot deploy VM by itself
 
