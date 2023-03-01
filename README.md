@@ -28,7 +28,7 @@ python3 scroogevm.py --strategy=greedy --load={input.json} --debug=1
 
 Debug mode does two things : display progress and wrote results in a json file than can be afterward used on post-analysis
 
-## Compare oversubscription strategies on offline mode
+## Offline mode : Compare oversubscription strategies
 
 One may want to compare different computation strategies on a offline setting. 
 We propose traces, different strategies and a notebook to do so
@@ -57,12 +57,13 @@ ls "$output_folder"
 ```
 NB: input and output_folder variable may be adapted to run others traces
 
-Post-analysis ( a jupyter notebook is pre-installed in our requirements):
+To analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements)
+Post-analysis :
 ```bash
 jupyter notebook
 ```
-Select ScroogeVM analysis.ipynb and execute all cells
-
+Select ScroogeVM analysis.ipynb and execute all cells sequentially
+ 
 ## Online mode 
 
 More components are needed to evaluate metrics on an online configuration.
@@ -71,7 +72,6 @@ More components are needed to evaluate metrics on an online configuration.
 * On master node : An InfluxDB database
 * On master node : Our aggregator _vmaggreg.py_ 
 * (optionally) On master node : Our ballooning mechanism _vmaggreg.py_ 
-* (optionally) On master node : Our deployment mechanism _vmdeploy.py_ 
 
 > - On workers node, VMs must run  on a QEMU/KVM environment with libvirt is required
 > - All python scripts parse environment variables for configuration. Please refer to _dotenv_ for an _.env_ example file.
