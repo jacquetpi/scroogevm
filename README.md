@@ -41,14 +41,14 @@ input="decreasing-workload.json"
 output_folder="results-decreasing-workload"
 ./launchallfromjson.sh "$input" "$output_folder"
 ```
-NB: input represents one of the json files obtained from our archive. This parameter may be adapted  
-NB: output_folder will be a directory used to store obtained results. Specified location is later needed for the notebook analysis. This parameter may be adapted.  
+`input` represents one of the json files obtained from our archive.  
+`output_folder` will be a directory used to store obtained results. Specified location is later needed for the notebook analysis.
 
 Third, to analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
 ```bash
 jupyter notebook
 ```
-Select ScroogeVM analysis.ipynb and execute all cells sequentially
+Select `scroogevm_analysis.ipynb` and execute all cells sequentially
  
 ## Online mode 
 
