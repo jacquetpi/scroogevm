@@ -57,8 +57,7 @@ ls "$output_folder"
 ```
 NB: input and output_folder variable may be adapted to run others traces
 
-To analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements)
-Post-analysis :
+To analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
 ```bash
 jupyter notebook
 ```
