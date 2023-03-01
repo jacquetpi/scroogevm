@@ -13,8 +13,8 @@ ScroogeVM can operate in online or offline mode. On online mode, it fetchs data 
 
 ```bash
 apt-get update && apt-get install -y git python3 python3.venv
-git clone https://github.com/jacquetpi/vmsched
-cd vmsched/
+git clone https://github.com/jacquetpi/scroogevm
+cd scroogevm/
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
@@ -35,11 +35,11 @@ We propose traces, different strategies and a notebook to do so
 
 Current oversubscription strategies can be seen in _model/oversubscriptioncomputation.py_
 
-Retrieve traces
+Retrieve traces from the external link and move the archive in your scroogevm directory.
+Unpack with:
 ```bash
-(scroogevm repo) wget {https://{tracelocation}
-(scroogevm repo) tar -xJf workload-traces.tar.xz
-(scroogevm repo) ls *.json
+tar -xJf workload-traces.tar.xz
+ls *.json
 ```
 
 Run all three strategies on one trace:
@@ -61,7 +61,7 @@ Post-analysis ( a jupyter notebook is pre-installed in our requirements):
 ```bash
 jupyter notebook
 ```
-Dedicated notebook : ScroogeVM analysis
+Select ScroogeVM analysis.ipynb and execute all cells
 
 ## Online mode 
 
