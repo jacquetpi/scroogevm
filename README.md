@@ -31,7 +31,7 @@ tar -xJf workload-traces.tar.xz
 ls *.json
 ```
 
-Second, execute ScroogeVM on one of the traces with different strategies. Three are available : percentile, doa and greedy (the latest being the computation introduced in our approach). 
+Second, execute ScroogeVM on one of the traces with different strategies. Three are available : percentile, doa and greedy (the latest being the computation introduced in our approach).   
 Implementation can be seen in _model/oversubscriptioncomputation.py_
 
 From the `scroogevm` directory, run all three strategies on one trace with the following script:
@@ -48,8 +48,8 @@ do
 done
 ls "$output_folder"
 ```
-NB: input represents one of the json file obtained from our archive. This parameter may be adapted
-NB: output_folder will be a directory used to store obtained results. Specified location is later needed for the notebook analysis. This parameter may be adapted.
+NB: input represents one of the json file obtained from our archive. This parameter may be adapted  
+NB: output_folder will be a directory used to store obtained results. Specified location is later needed for the notebook analysis. This parameter may be adapted.  
 NB: debug mode is required to generate a dump file with the computed results
 
 Third, to analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
