@@ -1,0 +1,34 @@
+# Example
+##############
+#  influxdb  #
+##############
+INFLUXDB_URL=""
+INFLUXDB_TOKEN=""
+INFLUXDB_ORG="org"
+INFLUXDB_BUCKET="bucket"
+##############
+#  vmaggreg  #
+##############
+AGGREG_STUB_LIST='[["url", "prefix"]]'
+AGGREG_FETCH_DELAY=0
+###############
+# vmrequester #
+###############
+STATE_ENDPOINT="/var/lib/vmsched/status.json"
+LIBVIRT_NODES='{"url":"qemu+ssh://ip/system?keyfile=id_rsa"}'
+###############
+#  scroogevm  #
+###############
+SCHED_NODES='["http://localhost:9100/metrics"]'
+SCHED_SCOPE_SLICE_S=15
+SCHED_SCOPE_S=30
+SCHED_SCOPE_INIT_FETCH_PREVIOUS=3
+SCHED_SCOPE_HISTORICAL=7 # number of previous slice occurences considered
+################
+# vmballooning #
+################
+BALLOONING_GRACE_PERIOD_S=600 # minimal interval between two "pressure session"
+BALLOONING_SCOPE_MN=60
+BALLOONING_MIN_CONFIG_MB=512 # Wont reduce config below this value
+BALLOONING_THRESHOLD_GAIN_MB=2048 # Will reduce if at least this value can be retrieved
+BALLOONING_SCOPE_SLEEP_S=60
