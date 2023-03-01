@@ -8,6 +8,7 @@ dump*.json
 pane-*
 debug/
 res-*/
+misc/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
