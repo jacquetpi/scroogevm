@@ -42,7 +42,8 @@ output_folder="results-decreasing-workload"
 ./launchallfromjson.sh "$input" "$output_folder"
 ```
 `input` represents one of the json files obtained from our archive.  
-`output_folder` will be a directory used to store obtained results. Specified location is later needed for the notebook analysis.
+`output_folder` will be a directory used to store obtained results. Specified location is later needed for the notebook analysis.  
+NB: It is a time consuming step (can take more than 1 hour)
 
 Third, to analyse the results, launch the notebook (a jupyter notebook is pre-installed in our requirements):
 ```bash
