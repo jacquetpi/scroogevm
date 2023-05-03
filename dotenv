@@ -1,0 +1,38 @@
+# Configuration example
+# In this configuration, scrooge monitors a single remote worker on http://192.168.0.1:9100/metrics
+# If ballooning is used, a certificate based access is required to each workers
+##############
+#  vmaggreg  #
+##############
+# Single node example : prefix should correspond to the one specified in vmprobe config file (default to example)
+AGGREG_STUB_LIST='[["http://192.168.0.1:9100/metrics", "prefix_example"]]' 
+# Multi-node example :
+#AGGREG_STUB_LIST='[["http://192.168.0.1:9100/metrics", "prefix_example1"],["http://192.168.0.2:9100/metrics", "prefix_example2"]]'
+AGGREG_FETCH_DELAY=0 # delay in seconds between two fetch, can be let to 0 to be automatically deducted
+##############
+#  influxdb  #
+##############
+INFLUXDB_URL="http://localhost:8086" # If InfluxDB is installed on the same node as scroogevm
+INFLUXDB_TOKEN="token_value"
+INFLUXDB_ORG="org"
+INFLUXDB_BUCKET="bucket"
+###############
+#  scroogevm  #
+###############
+STATE_ENDPOINT="/var/lib/scroogevm/status.json" # Current state (memory available for each node) is periodically written to this file
+SCHED_NODES='["http://192.168.0.1:9100/metrics"]' #url is used as id of worker node
+# Multi-node example :
+#SCHED_NODES='["http://192.168.0.1:9100/metrics", "http://192.168.0.2:9100/metrics"]' 
+SCHED_SCOPE_S=1800 # Duration of a "virtual day", scroogevm will guess available resources at the end of each scope (here 30mn, could/should be lower to test a setup)
+SCHED_SCOPE_SLICE_S=1800 # Duration of a "virtual hour", if equals to scope, there is no slice consideration (this is the case in our first paper)
+SCHED_SCOPE_INIT_FETCH_PREVIOUS=0 # if present, prior scope to the first scroogevm launch can be retrieved from InfluxDB
+SCHED_SCOPE_HISTORICAL=3 # number of previous scope occurences considered when guessing values
+################
+# vmballooning #
+################
+LIBVIRT_NODES='{"http://192.168.0.1:9100/metrics":"qemu+ssh://192.168.0.1/system?keyfile=id_rsa"}' # key:value qemu access based on ssh for each worker
+BALLOONING_GRACE_PERIOD_S=600 # minimal interval between two "pressure session" of a single VM
+BALLOONING_SCOPE_MN=60 # Considered scope duration when computing used resources for each VM
+BALLOONING_MIN_CONFIG_MB=512 # Won't reduce VM memory config below this value
+BALLOONING_THRESHOLD_GAIN_MB=2048 # Will reduce VM memory config if at least this value can be retrieved
+BALLOONING_SCOPE_SLEEP_S=60 # sleep between VM observations
