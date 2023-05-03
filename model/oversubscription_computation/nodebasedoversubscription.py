@@ -95,49 +95,64 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
         self.cpu_percentile = cpu_percentile
         self.mem_percentile = mem_percentile
 
-    def __compute_generic_tiers(self, is_stable : bool, max_percentile : int, booked_resources : int, 
-                                previous_tier0 : int, previous_tier1 : int, previous_booked : int):
+        self.streak_min = 3
+        self.streak_max = 10
+        self.streak_inc = 1
+        self.streak_dec = 2
 
-
-        delta_provision = booked_resources - previous_booked if previous_booked != None else booked_resources
-        delta_usage = max_percentile - previous_tier0  if previous_tier0 != None else 0
-
-        is_provisioning_increasing = (delta_provision > 0)
-        is_usage_increasing = (delta_usage > 0)
-
-        ratio = 2
-        if is_usage_increasing or is_provisioning_increasing:
-            generic_tier0 = max_percentile + max([delta_usage/ratio, delta_provision/ratio])
-            print("Debug0 : Increasing trend, majoring new peak to delta ", generic_tier0, max([delta_usage/ratio, delta_provision/ratio]))
+    def __compute_streak(self, current_streak: int, quiescient : bool, increase : bool):
+        # Compute value
+        if quiescient:
+            current_streak += self.streak_inc
         else:
-            if is_stable:
-               generic_tier0 = max_percentile # + max([np.abs(delta_usage)/weak_ratio, np.abs(delta_provision)/weak_ratio])
-               print("Debug0 : Stable with no increasing trend, fixing to percentile ", generic_tier0)
-            else:
-                generic_tier0 = previous_tier0
-                print("Debug0 : Unstable with no increasing trend, fixing to old percentile ", generic_tier0)
+            if increase: current_streak -= self.streak_dec # let as it is if unstable on a decreasing trend
+        # Manage bounds
+        if current_streak>self.streak_max: current_streak=self.streak_max
+        if current_streak<self.streak_min: current_streak=self.streak_min
+        return current_streak
 
-        print("Debug1 : final: ", generic_tier0)
+    def __compute_generic_tiers(self, current_percentile : int, booked_resources : int, 
+                                    previous_percentile : int, previous_booked : int,
+                                    stable_streak : int):
+        applied_ratio = self.streak_max - stable_streak + self.streak_min
+
+        generic_tier0 = current_percentile + (256/self.streak_max)
+
+        print("Greedy: ", generic_tier0, "from percentile", generic_tier0, ", using streak", stable_streak, "on applied ratio", applied_ratio, "with delta", (256/applied_ratio))
 
         generic_tier1 = generic_tier0 # No Tier1 in this paper
         return generic_tier0, generic_tier1
         
     # CPU tiers as threshold
     def compute_cpu_tiers(self):
+
         # Retrieve current slice intel
-        studied_slice = self.object_wrapper.get_last_slice()
-        max_percentile = self.round_to_upper_nearest(x=self.object_wrapper.get_slices_max_metric(cpu_percentile=self.cpu_percentile), nearest_val=0.1)
-        booked_cpu = studied_slice.get_booked_cpu()
-        is_stable = studied_slice.is_cpu_stable()
+        current_slice = self.object_wrapper.get_last_slice()
+        current_percentile = self.round_to_upper_nearest(current_slice.get_cpu_percentile(self.cpu_percentile), nearest_val=0.1)
+        current_booked_cpu = current_slice.get_booked_cpu()
+        is_stable = current_slice.is_cpu_stable()
+        
         # Retrieve last slice intel
         previous_slice = self.object_wrapper.get_nth_to_last_slice(1)
-        previous_cpu_tier0, previous_cpu_tier1, previous_cpu_booked = (None, None, None)
+        previous_percentile, previous_booked_cpu = (None, None)
+        cpu_stable_streak = 0
         if previous_slice is not None :
-            previous_cpu_tier0, previous_cpu_tier1 = previous_slice.get_cpu_tiers()
-            previous_cpu_booked = previous_slice.get_booked_cpu()
+            previous_percentile = self.round_to_upper_nearest(previous_slice.get_cpu_percentile(self.cpu_percentile), nearest_val=0.1)
+            previous_booked_cpu = previous_slice.get_booked_cpu()
+            cpu_stable_streak = getattr(previous_slice, 'cpu_stable_streak')
+        
+        # Compute streak
+        # delta_provision = booked_resources - previous_booked if previous_booked != None else booked_resources
+        delta_usage = current_percentile - previous_percentile  if previous_percentile != None else 0
+        cpu_stable_streak = self.__compute_streak(cpu_stable_streak, is_stable, delta_usage>0)
+
         # Compute tiers
-        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(is_stable=is_stable, max_percentile=max_percentile, booked_resources=booked_cpu, 
-                                                    previous_tier0=previous_cpu_tier0, previous_tier1=previous_cpu_tier1, previous_booked=previous_cpu_booked)
+        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(current_percentile=current_percentile, booked_resources=current_booked_cpu, 
+                                                    previous_percentile=previous_percentile, previous_booked=previous_booked_cpu,
+                                                    stable_streak=cpu_stable_streak)
+
+        # Update streak
+        setattr(current_slice, 'cpu_stable_streak', cpu_stable_streak)
         return super().update_cpu_tiers(cpu_tier0, cpu_tier1)
 
     # Mem tiers as threshold
