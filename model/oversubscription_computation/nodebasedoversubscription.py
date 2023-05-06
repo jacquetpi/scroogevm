@@ -96,9 +96,10 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
         self.mem_percentile = mem_percentile
 
         self.streak_min = 3
-        self.streak_max = 10
+        self.streak_max = 5
+
         self.streak_inc = 1
-        self.streak_dec = 2
+        self.streak_dec = 1
 
     def __compute_streak(self, current_streak: int, quiescient : bool, increase : bool):
         # Compute value
@@ -111,14 +112,15 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
         if current_streak<self.streak_min: current_streak=self.streak_min
         return current_streak
 
-    def __compute_generic_tiers(self, current_percentile : int, booked_resources : int, 
-                                    previous_percentile : int, previous_booked : int,
+    def __compute_generic_tiers(self, current_avg : int, current_std : int, 
+                                    previous_avg : int, previous_std : int,
                                     stable_streak : int):
+
         applied_ratio = self.streak_max - stable_streak + self.streak_min
 
-        generic_tier0 = current_percentile + (256/self.streak_max)
+        generic_tier0 = current_avg + applied_ratio*current_std
 
-        print("Greedy: ", generic_tier0, "from percentile", generic_tier0, ", using streak", stable_streak, "on applied ratio", applied_ratio, "with delta", (256/applied_ratio))
+        print("Greedy: ", generic_tier0, "from percentile", current_avg, ", using streak", stable_streak, "on applied ratio", applied_ratio, "with delta", applied_ratio*current_std)
 
         generic_tier1 = generic_tier0 # No Tier1 in this paper
         return generic_tier0, generic_tier1
@@ -126,29 +128,29 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
     # CPU tiers as threshold
     def compute_cpu_tiers(self):
 
-        # Retrieve current slice intel
+        # Retrieve current context
         current_slice = self.object_wrapper.get_last_slice()
-        current_percentile = self.round_to_upper_nearest(current_slice.get_cpu_percentile(self.cpu_percentile), nearest_val=0.1)
-        current_booked_cpu = current_slice.get_booked_cpu()
+        cpu_traces = self.object_wrapper.get_slices_raw_metric('cpu_usage')
+        current_avg = np.average(cpu_traces)
+        current_std = np.std(cpu_traces)
         is_stable = current_slice.is_cpu_stable()
         
         # Retrieve last slice intel
         previous_slice = self.object_wrapper.get_nth_to_last_slice(1)
-        previous_percentile, previous_booked_cpu = (None, None)
+        previous_avg, previous_std = (None, None)
         cpu_stable_streak = 0
         if previous_slice is not None :
-            previous_percentile = self.round_to_upper_nearest(previous_slice.get_cpu_percentile(self.cpu_percentile), nearest_val=0.1)
-            previous_booked_cpu = previous_slice.get_booked_cpu()
+            previous_avg = self.round_to_upper_nearest(previous_slice.get_cpu_avg(), nearest_val=0.1)
             cpu_stable_streak = getattr(previous_slice, 'cpu_stable_streak')
         
         # Compute streak
         # delta_provision = booked_resources - previous_booked if previous_booked != None else booked_resources
-        delta_usage = current_percentile - previous_percentile  if previous_percentile != None else 0
+        delta_usage = current_avg - previous_avg  if previous_avg != None else 0
         cpu_stable_streak = self.__compute_streak(cpu_stable_streak, is_stable, delta_usage>0)
 
         # Compute tiers
-        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(current_percentile=current_percentile, booked_resources=current_booked_cpu, 
-                                                    previous_percentile=previous_percentile, previous_booked=previous_booked_cpu,
+        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(current_avg=current_avg, current_std=current_std, 
+                                                    previous_avg=previous_avg, previous_std=previous_std,
                                                     stable_streak=cpu_stable_streak)
 
         # Update streak
@@ -177,7 +179,7 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
 class NSigmaOversubscriptionComputation(NodeBasedOversubscriptionComputation):
 
     def __init__(self, N : int):
-        self.N = N
+        self.N = 0
 
     def __compute_generic_tiers(self, metric : str):
         values = self.object_wrapper.get_slices_raw_metric(metric)

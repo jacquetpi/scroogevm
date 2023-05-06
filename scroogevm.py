@@ -79,7 +79,7 @@ def init_lstm_debug(debug_level : int):
     dump_lstm_file_location = 'dump-lstm.csv'
     if os.path.isfile(dump_lstm_file_location):
         os.remove(dump_lstm_file_location)
-    header = 'iteration\tmetric\tconfig\ttrainscore\tprojectionscore\tgap\tthreshold\trealdata\tpredictold\tpredictnew\n'
+    header = 'iteration\tmetric\tconfig\ttrainscore\tprojectionscore\tgap\tthreshold\trealdata\tpredictold\tpredictnew\tinputold\tinputnew\n'
     if debug>0:
         with open(dump_lstm_file_location,'w') as fd:
             fd.write(header)

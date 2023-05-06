@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
+import json
 from model.sliceobject import SliceObject
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 import tensorflow as tf
@@ -93,7 +94,7 @@ class StabilityAssesserLstm(object):
 
         traindata = self.transform_list_of_dict(traindata_as_list, metric, max_value_config)
         projectiondata_time, projectiondata_metrics = self.transform_dict(targetdata, metric, max_value_config)
-        
+
         # for reproductilibity
         seed(0)
         tf.random.set_seed(1) 
@@ -145,7 +146,8 @@ class StabilityAssesserLstm(object):
             is_stable = False
 
         self.dump_debug(dataset=dataset, look_back=look_back, trainPredict=trainPredict, projectionPredict=projectionPredict, 
-                        metric=metric, max_value_config=max_value_config, trainScore=trainScore, projectionScore=projectionScore, 
+                        metric=metric, max_value_config=max_value_config, trainScore=trainScore, projectionScore=projectionScore,
+                        input_old=traindata_as_list, input_new=targetdata,
                         abs_gap=abs_gap, threshold=threshold_val)
 
         return is_stable
@@ -160,7 +162,8 @@ class StabilityAssesserLstm(object):
         return np.array(dataX), np.array(dataY)
 
     def dump_debug(self, dataset : pd.DataFrame, look_back : pd.DataFrame, trainPredict : pd.DataFrame, projectionPredict : pd.DataFrame,
-                metric : str, max_value_config : int, trainScore : float, projectionScore : float, abs_gap : float, threshold : float):
+                metric : str, max_value_config : int, trainScore : float, projectionScore : float, abs_gap : float, threshold : float,
+                input_old : list, input_new : dict):
         
         dump_lstm_file_location = 'dump-lstm.csv'
         if os.path.isfile(dump_lstm_file_location):
@@ -186,7 +189,9 @@ class StabilityAssesserLstm(object):
                     str(threshold) + separator +\
                     self.convert_to_hex( ''.join(str(x) for x in np_inverse)) + separator +\
                     self.convert_to_hex( ''.join(str(x) for x in trainPredictPlot)) + separator +\
-                    self.convert_to_hex( ''.join(str(x) for x in projectionPredictPlot)) + '\n'
+                    self.convert_to_hex( ''.join(str(x) for x in projectionPredictPlot)) + separator +\
+                    self.convert_to_hex(json.dumps(input_old)) + separator +\
+                    self.convert_to_hex(json.dumps(input_new)) +'\n'
                 )
 
     def convert_to_hex(self, string : str):

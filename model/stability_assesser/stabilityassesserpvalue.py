@@ -18,7 +18,8 @@ class StabilityAssesserPValue(object):
         new_std =  np.std(new_data)
         stats, pvalue = ttest_ind_from_stats(old_average, old_std, len(old_data), new_average, new_std, len(new_data))
         # identical list return nan, nan which is evaluated as false
-        return pvalue < threshold
+        rejection = pvalue < threshold
+        return not rejection #Stable if not rejected
 
     def assess_from_slice(self, last_slice : SliceObject, new_slice : SliceObject, metric, threshold : int = 0.1):
         old_data = last_slice.get_raw_metric(metric=metric)

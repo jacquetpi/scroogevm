@@ -11,9 +11,10 @@ class StabilityAssesserPercentileThreshold(object):
         self.id = StabilityAssesserPercentileThreshold.instance_count 
         StabilityAssesserPercentileThreshold.instance_count+=1
 
-    def assess(self, old_data : list, new_data : list, threshold : int = 0, percentile : int = 90):
-        applied_threshold = np.percentile(old_data, percentile) + threshold * np.std(old_data)
-        return np.percentile(new_data, percentile) < applied_threshold
+    def assess(self, old_data : list, new_data : list, threshold_inf : int = 0.9, threshold_sup : int = 1.1, percentile : int = 90):
+        applied_threshold_inf = np.percentile(old_data, percentile)*threshold_inf
+        applied_threshold_sup =np.percentile(old_data, percentile)*threshold_sup
+        return (applied_threshold_inf < np.percentile(new_data, percentile)) and (np.percentile(new_data, percentile) < applied_threshold_sup)
 
     def is_incoherent_value(self, new_slice : SliceObject, std_metric : str, metric : str = None,  percentile : int = 90, threshold : int = 1):
         
