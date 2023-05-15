@@ -10,6 +10,7 @@ dump*/
 pane-*
 debug/
 res-*/
+figures/
 scroogevm_lstm_analysis2.ipynb
 
 ### Python ###

@@ -105,7 +105,7 @@ class SliceModel(object):
             elif self.strategy == 'doa':
                 nodecomputation = DoaOversubscriptionComputation()
             elif self.strategy == 'greedy':
-                nodecomputation = GreedyOversubscriptionComputation(cpu_percentile=self.model_cpu_percentile,mem_percentile=self.model_mem_percentile)
+                nodecomputation = GreedyOversubscriptionComputation()
             elif (self.strategy == 'nsigma') or (self.strategy == 'maxpeak'):
                 nodecomputation = NSigmaOversubscriptionComputation(N=5)
             elif self.strategy == 'borg':

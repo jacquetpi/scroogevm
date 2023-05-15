@@ -91,35 +91,30 @@ class PercentileOversubscriptionComputation(NodeBasedOversubscriptionComputation
 
 class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
 
-    def __init__(self, cpu_percentile : int, mem_percentile : int):
-        self.cpu_percentile = cpu_percentile
-        self.mem_percentile = mem_percentile
+    def __init__(self):
+        self.bound_min  = 2.0
+        self.bound_max  = 5.0
+        self.ratio_init = self.bound_min  + (self.bound_max-self.bound_min)/2
 
-        self.streak_min  = 2.0
-        self.streak_max  = 4.0
-        self.streak_init = self.streak_min  + (self.streak_max-self.streak_min)/2
+        self.ratio_inc = 0.2
+        self.ratio_dec = 0.1
 
-        self.streak_inc = 0.1
-        self.streak_dec = 0.15
-
-    def __compute_streak(self, current_streak: int, quiescient : bool, increase : bool):
+    def __compute_ratio(self, current_ratio: int, quiescient : bool, increase : bool):
         # Compute value
         if quiescient:
-            current_streak += self.streak_inc
+            current_ratio -= self.ratio_dec
         else:
-            if increase: current_streak -= self.streak_dec # let as it is if unstable on a decreasing trend
+            if increase: current_ratio += self.ratio_inc # let as it is if unstable on a decreasing trend
         # Manage bounds
-        if current_streak>self.streak_max: current_streak=self.streak_max
-        if current_streak<self.streak_min: current_streak=self.streak_min
-        return current_streak
+        if current_ratio>self.bound_max: current_ratio=self.bound_max
+        if current_ratio<self.bound_min: current_ratio=self.bound_min
+        return current_ratio
 
-    def __compute_generic_tiers(self, current_avg : int, current_std : int, stable_streak : int):
+    def __compute_generic_tiers(self, current_avg : int, current_std : int, current_ratio : int):
 
-        applied_ratio = self.streak_max - stable_streak + self.streak_min
+        generic_tier0 = current_avg + current_ratio*current_std
 
-        generic_tier0 = current_avg + applied_ratio*current_std
-
-        print("Greedy: ", generic_tier0, "from avg", current_avg, ", using streak", stable_streak)
+        print("Greedy: ", generic_tier0, "from avg", current_avg, ", using ratio", current_ratio)
 
         generic_tier1 = generic_tier0 # No Tier1 in this paper
         return generic_tier0, generic_tier1
@@ -137,26 +132,26 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
         # Retrieve last slice intel
         previous_slice = self.object_wrapper.get_nth_to_last_slice(1)
         previous_avg = None
-        cpu_stable_streak = self.streak_init
+        cpu_ratio = self.ratio_init
         if previous_slice is not None :
             previous_avg = self.round_to_upper_nearest(previous_slice.get_cpu_avg(), nearest_val=0.1)
-            cpu_stable_streak = getattr(previous_slice, 'cpu_stable_streak')
+            cpu_ratio = getattr(previous_slice, 'cpu_ratio')
         
-        # Compute streak
+        # Compute ratio
         # delta_provision = booked_resources - previous_booked if previous_booked != None else booked_resources
         delta_usage = current_avg - previous_avg  if previous_avg != None else 0
-        cpu_stable_streak = self.__compute_streak(cpu_stable_streak, is_stable, delta_usage>0)
+        cpu_ratio = self.__compute_ratio(cpu_ratio, is_stable, delta_usage>0)
 
         # Compute tiers
-        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(current_avg=current_avg, current_std=current_std, stable_streak=cpu_stable_streak)
+        cpu_tier0, cpu_tier1 = self.__compute_generic_tiers(current_avg=current_avg, current_std=current_std, current_ratio=cpu_ratio)
 
-        # Update streak
-        setattr(current_slice, 'cpu_stable_streak', cpu_stable_streak)
+        # Update ratio
+        setattr(current_slice, 'cpu_ratio', cpu_ratio)
         return super().update_cpu_tiers(cpu_tier0, cpu_tier1)
 
     # Mem tiers as threshold
     def compute_mem_tiers(self):
-        
+
         # Retrieve current context
         current_slice = self.object_wrapper.get_last_slice()
         mem_traces = self.object_wrapper.get_slices_raw_metric('mem_usage')
@@ -167,21 +162,21 @@ class GreedyOversubscriptionComputation(NodeBasedOversubscriptionComputation):
         # Retrieve last slice intel
         previous_slice = self.object_wrapper.get_nth_to_last_slice(1)
         previous_avg = None
-        mem_stable_streak = self.streak_init
+        mem_ratio = self.ratio_init
         if previous_slice is not None :
             previous_avg = self.round_to_upper_nearest(previous_slice.get_mem_avg(), nearest_val=0.1)
-            mem_stable_streak = getattr(previous_slice, 'mem_stable_streak')
+            mem_ratio = getattr(previous_slice, 'mem_ratio')
 
-        # Compute streak
+        # Compute ratio
         # delta_provision = booked_resources - previous_booked if previous_booked != None else booked_resources
         delta_usage = current_avg - previous_avg  if previous_avg != None else 0
-        mem_stable_streak = self.__compute_streak(mem_stable_streak, is_stable, delta_usage>0)
+        mem_ratio = self.__compute_ratio(mem_ratio, is_stable, delta_usage>0)
         
         # Compute tiers
-        mem_tier0, mem_tier1 = self.__compute_generic_tiers(current_avg=current_avg, current_std=current_std, stable_streak=mem_stable_streak)
+        mem_tier0, mem_tier1 = self.__compute_generic_tiers(current_avg=current_avg, current_std=current_std, current_ratio=mem_ratio)
 
-        # Update streak
-        setattr(current_slice, 'mem_stable_streak', mem_stable_streak)
+        # Update ratio
+        setattr(current_slice, 'mem_ratio', mem_ratio)
         return super().update_mem_tiers(mem_tier0, mem_tier1)
 
 class NSigmaOversubscriptionComputation(NodeBasedOversubscriptionComputation):
