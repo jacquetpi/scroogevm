@@ -26,23 +26,32 @@ class StabilityAssesserLstm(object):
         self.id = StabilityAssesserLstm.instance_count
         StabilityAssesserLstm.instance_count+=1
 
-    def assess(self, old_data : list, new_data : list, max_config = None, threshold : int = 0.01, debug : bool =False):
+    def assess(self, old_data : list = None, new_data : list = None, old_data_raw : list = None, new_data_raw : dict = None, max_config = None, threshold : int = 0.01, debug : bool =False):
         if max_config == None:
             max_config = max([max(old_data), max(new_data)])
 
-        time_list = list(range(len(old_data) + len(new_data)))
+        if new_data_raw != None:
+            new_data_list = new_data_raw
+            metric = list(new_data_list.keys())[1]
+        elif new_data !=None:
+            time_list = list(range(len(old_data) + len(new_data)))
+            metric = 'metric'
+            new_data_list = dict()
+            new_data_list['time'] = time_list[:len(old_data)]
+            new_data_list['metric'] = [float(x) for x in old_data]
+        else: raise ValueError("New data must be passed")
 
-        new_data_list = dict()
-        new_data_list['time'] = time_list[:len(old_data)]
-        new_data_list['metric'] = [float(x) for x in old_data]
-
-        current_data = list()
-        x = dict()
-        x['time'] = time_list[len(old_data):]
-        x['metric'] = [float(x) for x in new_data]
-        current_data.append(x)
+        if old_data_raw != None:
+            current_data = old_data_raw
+        elif old_data !=None:
+            current_data = list()
+            x = dict()
+            x['time'] = time_list[len(old_data):]
+            x['metric'] = [float(x) for x in new_data]
+            current_data.append(x)
+        else: raise ValueError("Old data must be passed")
         
-        return self.__internal_assess(traindata_as_list=current_data, targetdata=new_data_list, metric='metric', max_value_config=max_config, threshold=threshold, debug=debug)
+        return self.__internal_assess(traindata_as_list=current_data, targetdata=new_data_list, metric=metric, max_value_config=max_config, threshold=threshold, debug=debug)
 
     def assess_form_slice_list(self, slice_list : list, new_slice : SliceObject, metric : str, max_config : int):
         current_data = list()

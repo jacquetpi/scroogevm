@@ -32,14 +32,11 @@ def main_loop_from_dump(dump_to_load: dict, debug : int = 0,  cpu_percentile : i
     cpu_percentile=cpu_percentile, mem_percentile=mem_percentile, strategy=SCHED_STRATEGY, aggregation=aggregation,
     model_scope=dump_to_load["config"]["node_scope"], slice_scope=dump_to_load["config"]["slice_scope"])
 
-    stop_at = 35
     for occurence in range(len(dump_to_load["epoch"])):
         # Retrieve nodes model
         for node_id, model in models.items():
             slice_number = model.build_slice_from_dump(dump=dump_to_load, occurence=occurence)
             manage_node_debug(node_model=model, slice_number=slice_number, debug=debug, epoch=dump_to_load["epoch"][occurence], cpu_percentile=cpu_percentile, mem_percentile=mem_percentile, aggregation=aggregation)
-        if occurence>stop_at:
-            break
 
     for node, data in models.items():
         file = "dump-" + node.replace("/", "") + "_c" + str(cpu_percentile) + "_m" + str(mem_percentile) + "_a" + str(aggregation) + ".json"
