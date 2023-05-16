@@ -52,6 +52,7 @@ class RClikeOversubscriptionComputation(VmBasedOversubscriptionComputation):
             config = vmwrapper.get_last_slice().get_cpu_config()
             if vmwrapper.is_historical_full():
                 generic_tier0 = np.percentile(values, self.cpu_percentile)*config # convert percent to cores
+                if generic_tier0>config: generic_tier0=config # incoherent values (libvirt aggregation issue?)
             else: # not enough value, we use config
                 generic_tier0 = config
         return generic_tier0, generic_tier0

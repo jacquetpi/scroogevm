@@ -37,7 +37,7 @@ def main_loop_from_dump(dump_to_load: dict, debug : int = 0,  cpu_percentile : i
         for node_id, model in models.items():
             slice_number = model.build_slice_from_dump(dump=dump_to_load, occurence=occurence)
             manage_node_debug(node_model=model, slice_number=slice_number, debug=debug, epoch=dump_to_load["epoch"][occurence], cpu_percentile=cpu_percentile, mem_percentile=mem_percentile, aggregation=aggregation)
-
+            
     for node, data in models.items():
         file = "dump-" + node.replace("/", "") + "_c" + str(cpu_percentile) + "_m" + str(mem_percentile) + "_a" + str(aggregation) + ".json"
         with open(file, 'w') as f:
