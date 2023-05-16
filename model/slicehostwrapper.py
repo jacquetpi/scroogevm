@@ -64,7 +64,7 @@ class SliceHostWrapper(SliceObjectWrapper):
         return False
 
     def compute_stability(self, slice_to_be_added : SliceHost):
-        if self.strategy != "greedy":
+        if self.strategy != "scroogevm":
             return True, True
             
         if not self.is_historical_full():

@@ -98,13 +98,13 @@ class SliceModel(object):
         (slice_mem_tier0, slice_mem_tier1) = (None, None)
 
         # Oversubscription strategies based on node usage
-        if self.strategy in ['percentile', 'doa', 'greedy', 'nsigma', 'borg', 'maxpeak']:
+        if self.strategy in ['percentile', 'doa', 'scroogevm', 'nsigma', 'borg', 'maxpeak']:
             nodecomputation = None
             if self.strategy == 'percentile':
                 nodecomputation = PercentileOversubscriptionComputation(cpu_percentile=self.model_cpu_percentile,mem_percentile=self.model_mem_percentile)
             elif self.strategy == 'doa':
                 nodecomputation = DoaOversubscriptionComputation()
-            elif self.strategy == 'greedy':
+            elif self.strategy == 'scroogevm':
                 nodecomputation = GreedyOversubscriptionComputation()
             elif (self.strategy == 'nsigma') or (self.strategy == 'maxpeak'):
                 nodecomputation = NSigmaOversubscriptionComputation(N=5)

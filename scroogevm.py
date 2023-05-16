@@ -8,7 +8,7 @@ from model.dumpwriter import DumpWriter
 STATE_ENDPOINT = ""
 
 SCHED_NODES = list()
-SCHED_STRATEGY = "greedy"
+SCHED_STRATEGY = "scroogevm"
 SCHED_SCOPE_S = 0
 SCHED_SCOPE_SLICE_S = 0
 SCHED_SCOPE_INIT_FETCH_PREVIOUS = 0
@@ -37,7 +37,7 @@ def main_loop_from_dump(dump_to_load: dict, debug : int = 0,  cpu_percentile : i
         for node_id, model in models.items():
             slice_number = model.build_slice_from_dump(dump=dump_to_load, occurence=occurence)
             manage_node_debug(node_model=model, slice_number=slice_number, debug=debug, epoch=dump_to_load["epoch"][occurence], cpu_percentile=cpu_percentile, mem_percentile=mem_percentile, aggregation=aggregation)
-            
+
     for node, data in models.items():
         file = "dump-" + node.replace("/", "") + "_c" + str(cpu_percentile) + "_m" + str(mem_percentile) + "_a" + str(aggregation) + ".json"
         with open(file, 'w') as f:
@@ -72,7 +72,7 @@ def main_loop_live(debug : int = 0,  cpu_percentile : int = 90, mem_percentile :
         sleep_duration = SCHED_SCOPE_SLICE_S - (int(time.time()) - loop_begin)
 
 def init_lstm_debug(debug_level : int):
-    if SCHED_STRATEGY != "greedy" : return
+    if SCHED_STRATEGY != "scroogevm" : return
     dump_lstm_file_location = 'dump-lstm.csv'
     if os.path.isfile(dump_lstm_file_location):
         os.remove(dump_lstm_file_location)
@@ -108,7 +108,7 @@ if __name__ == '__main__':
         elif current_argument in ("-u", "--url"):
             SCHED_NODES = json.loads(current_value)
         elif current_argument in ("-s", "--strategy"):
-            strategies=['percentile', 'doa', 'greedy', 'nsigma', 'rclike', 'borg', 'maxpeak']
+            strategies=['percentile', 'doa', 'scroogevm', 'nsigma', 'rclike', 'borg', 'maxpeak']
             if current_value not in strategies:
                 print("Strategy must be in ", strategies)
                 sys.exit(2)

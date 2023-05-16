@@ -16,7 +16,7 @@ if [ -d "$output_folder" ]; then
 fi
 mkdir "$output_folder"
 source venv/bin/activate
-declare -a strategies=("percentile" "doa" "nsigma" "rclike" "borg" "maxpeak" "greedy")
+declare -a strategies=("doa" "nsigma" "rclike" "borg" "scroogevm")
 for strategy in "${strategies[@]}"
 do
     echo "Running ScroogeVM on $strategy strategy"
