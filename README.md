@@ -25,7 +25,7 @@ python3 -m pip install -r requirements.txt
 One may want to compare different computation strategies on a offline setting. 
 We propose traces, a selection of strategies, and a notebook to do so.
 
-First, retrieve our archive from the external link, move it to the `scroogevm` directory and unpack traces with :
+First, retrieve our archive from the [external link](https://drive.google.com/file/d/1L1kGqwiqJmrr54UlGiu_Gzk6c6b_8gFx/view?usp=share_link), move it to the `scroogevm` directory and unpack traces with :
 ```bash
 tar -xJf workload-traces.tar.xz
 ls *.json
@@ -68,7 +68,7 @@ cp dotenv .env
 ```
 
 #### 1) Probe
-**On each worker node**, a probe and its exporter are required. Please refer to its dedicated repository for installation instructions: https://github.com/jacquetpi/vmprobe  
+**On each worker node**, a probe and its exporter are required. Please refer to its dedicated repository for installation instructions: https://anonymous.4open.science/r/vmprobe-4618  
 
 * Prefix used during vmprobe installation should be written on `.env` file (on `AGGREG_STUB_LIST` key). If multiple workers are used, all prefix should be written to the file.
 * A prometheus http endpoint (e.g. `http://192.168.0.1:9100/metrics`) should be accessible from scroogevm point of view and written on `.env` file (on `AGGREG_STUB_LIST` key).. If multiple workers are used, all url should be written to the file.
